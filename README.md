@@ -5,3 +5,4 @@
 - Select required columns and do the filtering, then join, this will lead to good performance.
 - As caching is not possible in Free Edition of Databricks, I have not done that, it will give major performance improvement. Like final joined dataframe should be cachedm, as it's being used multiple times.
 - Once the final set of KPIs and data size is known, we can decide the joining strategy, wether to use Sort Merge Join or Shuffle Hash Join.
+- At few places, I have made assumptions like considering Primary Keys.
