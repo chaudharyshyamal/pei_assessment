@@ -2,6 +2,8 @@
 from pyspark.sql.functions import expr, col
 from pyspark.sql import DataFrame
 
+# COMMAND ----------
+
 def validate_columns(df: DataFrame, columns_expected_datatype: dict):
     """
     Validates the type of a column in a DataFrame.

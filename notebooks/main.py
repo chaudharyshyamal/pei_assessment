@@ -168,11 +168,11 @@ else:
 
 # COMMAND ----------
 
-display(df_orders.join(df_products, "product_id", "left").drop(df_products.product_id).filter(col("product_id").isNull()))
+# display(df_orders.join(df_products, "product_id", "left").drop(df_products.product_id).filter(col("product_id").isNull()))
 
 # COMMAND ----------
 
-display(df_orders.join(df_customers, "customer_id", "left").drop(df_customers.customer_id).filter(col("customer_id").isNull()))
+# display(df_orders.join(df_customers, "customer_id", "left").drop(df_customers.customer_id).filter(col("customer_id").isNull()))
 
 # COMMAND ----------
 
@@ -207,7 +207,7 @@ df_enriched_orders = df_orders_customers_products.withColumn("total_sales", roun
                                                 .withColumn("unit_selling_price", round(col("final_price") / col("quantity"), 2)) \
                                                 .withColumn("days_to_ship", datediff("ship_date", "order_date"))
 
-display(df_enriched_orders)
+# display(df_enriched_orders)
 
 # COMMAND ----------
 
@@ -227,7 +227,7 @@ df_enriched_customers = df_enriched_orders.groupBy("customer_id") \
                                                     max("order_date").alias("latest_order_date")
                                               )
 
-display(df_enriched_customers)
+# display(df_enriched_customers)
 
 # COMMAND ----------
 
@@ -244,7 +244,7 @@ df_enriched_products = df_enriched_orders.groupBy("product_id") \
                                                   countDistinct("customer_id").alias("distinct_customers_bought")
                                             )
 
-display(df_enriched_products)
+# display(df_enriched_products)
 
 # COMMAND ----------
 
@@ -256,7 +256,7 @@ display(df_enriched_products)
 df_enriched_2 = df_enriched_orders.join(df_enriched_products, "product_id", "left") \
                                   .join(df_enriched_customers, "customer_id", "left")
 
-display(df_enriched_2)
+# display(df_enriched_2)
 
 # COMMAND ----------
 
@@ -279,7 +279,7 @@ df_enriched_3 = df_orders_customers_products.select("order_id",
                                                 "price",
                                                 "discount",
                                                 round(col("profit"), 2).alias("profit"))
-display(df_enriched_3)
+# display(df_enriched_3)
 
 # COMMAND ----------
 
@@ -301,7 +301,7 @@ df_enriched_4 = df_orders_customers_products.groupBy(
                                         .agg(round(sum("profit").alias("total_profit"), 2)) \
                                         .orderBy("order_year", "category", "sub_category", "customer_name")
 
-display(df_enriched_4)
+# display(df_enriched_4)
 
 # COMMAND ----------
 
@@ -347,7 +347,7 @@ df_profit_by_year = df_orders_customers_products.groupBy("order_year") \
                                                 .agg(round(sum("profit"), 2).alias("profit_per_year")) \
                                                 .orderBy("order_year")
 
-display(df_profit_by_year)
+# display(df_profit_by_year)
 
 # COMMAND ----------
 
@@ -380,7 +380,7 @@ display(df_profit_by_year)
 df_profit_by_year_category = df_orders_customers_products.groupBy("order_year", "category") \
                                                         .agg(round(sum("profit"), 2).alias("profit_per_year_category")) \
                                                         .orderBy(asc("order_year"), desc("profit_per_year_category"))
-display(df_profit_by_year_category)
+# display(df_profit_by_year_category)
 
 # COMMAND ----------
 
@@ -412,7 +412,7 @@ display(df_profit_by_year_category)
 df_profit_by_customer = df_orders_customers_products.groupBy("customer_name") \
                                                     .agg(round(sum("profit"), 2).alias("profit_per_customer")) \
                                                     .orderBy(desc("profit_per_customer"))
-display(df_profit_by_customer)
+# display(df_profit_by_customer)
 
 # COMMAND ----------
 
@@ -445,8 +445,4 @@ display(df_profit_by_customer)
 df_profit_by_customer_year = df_orders_customers_products.groupBy("customer_name", "order_year") \
                                                         .agg(round(sum("profit"), 2).alias("profit_per_customer_year")) \
                                                         .orderBy(asc("order_year"), desc("profit_per_customer_year"))
-display(df_profit_by_customer_year)
-
-# COMMAND ----------
-
-
+# display(df_profit_by_customer_year)
