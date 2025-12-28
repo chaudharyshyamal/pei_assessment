@@ -1,5 +1,6 @@
 # Databricks notebook source
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import col
 
 # COMMAND ----------
 

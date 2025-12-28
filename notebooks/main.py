@@ -4,19 +4,19 @@ from pyspark.sql.functions import to_date, col, round, year, coalesce, lit, sum,
 
 # COMMAND ----------
 
-# MAGIC %run ../utils/config.py
+# MAGIC %run ../utils/config
 
 # COMMAND ----------
 
-# MAGIC %run ../utils/schemas.py
+# MAGIC %run ../utils/schemas
 
 # COMMAND ----------
 
-# MAGIC %run ../utils/helpers.py
+# MAGIC %run ../utils/helpers
 
 # COMMAND ----------
 
-# MAGIC %run ../dq/rules.py
+# MAGIC %run ../dq/rules
 
 # COMMAND ----------
 
