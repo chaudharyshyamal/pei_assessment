@@ -1,10 +1,15 @@
 # Databricks notebook source
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col
 
 # COMMAND ----------
 
 import pandas as pd
+
+spark = SparkSession.builder \
+        .master("local[1]") \
+        .appName("pytest-spark") \
+        .getOrCreate()
 
 # COMMAND ----------
 

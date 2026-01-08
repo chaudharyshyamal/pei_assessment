@@ -1,5 +1,5 @@
 # Databricks notebook source
-from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType, LongType, DateType
+from pyspark.sql.types import StructType, StructField, StringType, DoubleType, LongType, DateType
 
 # COMMAND ----------
 
