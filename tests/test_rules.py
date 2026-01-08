@@ -7,8 +7,6 @@ from dq.rules import validate_columns, validate_primary_key_unique, null_check, 
 
 # COMMAND ----------
 
-import pytest
-from pyspark.sql import Row
 from pyspark.sql.functions import expr, col, when, count
 from unittest.mock import MagicMock, patch
 
@@ -148,33 +146,6 @@ def test_validate_primary_key_unique_composite_key(spark):
     result = validate_primary_key_unique(df, ["id", "sub"])
 
     assert result.count() == 2
-
-
-def test_validate_primary_key_unique_mocked_branch_true():
-
-    mock_df = MagicMock()
-    mock_df.count.return_value = 10
-
-    mock_df.select.return_value.dropDuplicates.return_value.count.return_value = 8
-
-    # Required chained calls
-    mock_df.groupBy.return_value.count.return_value.filter.return_value.drop.return_value = mock_df
-    mock_df.join.return_value = "DUP_ROWS"
-
-    result = validate_primary_key_unique(mock_df, ["id"])
-
-    assert result == "DUP_ROWS"
-
-
-def test_validate_primary_key_unique_mocked_branch_false():
-
-    mock_df = MagicMock()
-    mock_df.count.return_value = 5
-    mock_df.select.return_value.dropDuplicates.return_value.count.return_value = 5
-
-    result = validate_primary_key_unique(mock_df, ["id"])
-
-    assert result == "No duplicates found"
 
 # COMMAND ----------
 

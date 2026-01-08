@@ -151,28 +151,9 @@ else:
 # Data Quality - check for missing customer_id in customers table, but present in orders table
 missing_customers_df = missing_reference_check(df_orders, df_customers, "customer_id")
 if missing_customers_df.count() > 0:
-    print("Missing product_id in products table, but present in orders table")
+    print("Missing customer_id in products table, but present in orders table")
 else:
-    print("No missing product_id in products table, but present in orders table")
-
-# COMMAND ----------
-
-def missing_reference(df, df_ref, join_col_name):
-    return df.join(df_ref, join_col_name, "left").drop(df_ref[join_col_name]).filter(col(join_col_name).isNull())
-
-missing_reference_df = missing_reference(df_orders, df_products, "product_id")
-if missing_reference_df.count() > 0:
-    print("Missing product_id in products table, but present in orders table")
-else:
-    print("No missing product_id in products table, but present in orders table")
-
-# COMMAND ----------
-
-# display(df_orders.join(df_products, "product_id", "left").drop(df_products.product_id).filter(col("product_id").isNull()))
-
-# COMMAND ----------
-
-# display(df_orders.join(df_customers, "customer_id", "left").drop(df_customers.customer_id).filter(col("customer_id").isNull()))
+    print("No missing customer_id in products table, but present in orders table")
 
 # COMMAND ----------
 

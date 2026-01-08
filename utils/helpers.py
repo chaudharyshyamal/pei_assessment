@@ -4,6 +4,10 @@ from pyspark.sql.functions import col
 
 # COMMAND ----------
 
+import pandas as pd
+
+# COMMAND ----------
+
 def read_volume_files(volume_path: str, column_mapping_dict: dict = {}, **options) -> DataFrame:
     """
     Reads JSON, CSV, XLSX as Spark DataFrame from Volumes,
@@ -29,7 +33,8 @@ def read_volume_files(volume_path: str, column_mapping_dict: dict = {}, **option
     elif volume_path.endswith(".json"):
         df = spark.read.format("json").options(**default_options).load(volume_path)
     elif volume_path.endswith(".xlsx"):
-        df = spark.read.options(**default_options).excel(volume_path)
+        # df = spark.read.options(**default_options).excel(volume_path)
+        df = spark.read.format("excel").options(**default_options).load(volume_path)
     else:
         raise ValueError(f"Unsupported file format: {volume_path}")
 

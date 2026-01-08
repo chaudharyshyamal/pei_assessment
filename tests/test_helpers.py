@@ -8,13 +8,13 @@ from pyspark.sql.types import StructType, StructField, StringType, DoubleType, I
 
 # COMMAND ----------
 
-from utils.helpers import read_volume_files, cast_columns, raw_date_write
+from utils.helpers import read_volume_files, cast_columns
 
 # COMMAND ----------
 
 @pytest.fixture(scope="session")
 def spark():
-    return SparkSession.builder.getOrCreate()
+    return SparkSession.builder.appName("pytest").getOrCreate()
 
 # COMMAND ----------
 
@@ -35,6 +35,7 @@ def default_options():
     [
         ("/Volumes/data/customers.csv", "csv"),
         ("/Volumes/data/customers.json", "json"),
+        ("/Volumes/data/customers.xlsx", "xlsx")
     ],
 )
 def test_read_volume_files_csv_json(
@@ -44,6 +45,7 @@ def test_read_volume_files_csv_json(
     mock_reader.format.return_value = mock_reader
     mock_reader.options.return_value = mock_reader
     mock_reader.load.return_value = mock_df
+    mock_spark.read.excel.return_value = mock_df
 
     with patch("your_module.spark.read", mock_reader):
         result_df = read_volume_files(path, column_mapping_dict={"A": "a"})
@@ -54,23 +56,6 @@ def test_read_volume_files_csv_json(
 
     mock_df.withColumnsRenamed.assert_called_once_with({"A": "a"})
     assert result_df == mock_df
-
-
-def test_read_volume_files_xlsx(spark, mock_df, default_options):
-    mock_reader = MagicMock()
-    mock_reader.options.return_value = mock_reader
-    mock_reader.excel.return_value = mock_df
-
-    with patch("your_module.spark.read", mock_reader):
-        result_df = read_volume_files(
-            "/Volumes/data/file.xlsx",
-            column_mapping_dict={"B": "b"},
-            extraOpt="x"
-        )
-
-    # default + override options
-    expected_options = default_options.copy()
-    expected_options["extraOpt"]()_
 
 # COMMAND ----------
 
