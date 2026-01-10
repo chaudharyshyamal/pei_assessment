@@ -4,7 +4,7 @@ from pyspark.sql.functions import col
 
 # COMMAND ----------
 
-import pandas as pd
+# import pandas as pd
 
 spark = SparkSession.builder \
         .master("local[1]") \

@@ -1,6 +1,15 @@
 # Databricks notebook source
-from pyspark.sql.functions import expr, col
-from pyspark.sql import DataFrame
+from pyspark.sql.functions import expr, col, when, count
+from pyspark.sql import DataFrame, SparkSession
+
+# COMMAND ----------
+
+# import pandas as pd
+
+# spark = SparkSession.builder \
+#         .master("local[1]") \
+#         .appName("pytest-spark") \
+#         .getOrCreate()
 
 # COMMAND ----------
 
@@ -27,7 +36,6 @@ def validate_columns(df: DataFrame, columns_expected_datatype: dict):
     for column, expected_type in columns_expected_datatype.items():
         # Flag column
         if expected_type == "date":
-            # df = df.withColumn(column, expr(f"to_date({column}, 'd/M/yyyy')"))
             df = df.withColumn(column, expr(f"coalesce(to_date({column}, 'd/M/yyyy'), to_date({column}, 'yyyy-MM-dd'))"))
         else:
             df = df.withColumn(column, expr(f"try_cast({column} as {expected_type})"))
@@ -45,7 +53,7 @@ def validate_columns(df: DataFrame, columns_expected_datatype: dict):
 
 # COMMAND ----------
 
-def validate_primary_key_unique(df: DataFrame, primary_key: list):
+def validate_primary_key_unique(df: DataFrame, primary_key: str):
     """
     Validate primary key uniqueness and returns duplicate rows
 
@@ -192,4 +200,4 @@ def missing_reference_check(df, df_ref, join_col_name):
     Returns:
         Spark DataFrame
     """
-    return df.join(df_ref, join_col_name, "left").drop(df_ref[join_col_name]).filter(col(join_col_name).isNull())
+    return df.join(df_ref, join_col_name, "left").filter(df_ref[join_col_name].isNull()).drop(df_ref[join_col_name])
