@@ -1,19 +1,19 @@
 # Databricks notebook source
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, desc, asc, round
 
 # COMMAND ----------
 
 import pandas as pd
 
-spark = SparkSession.builder \
-        .master("local[1]") \
-        .appName("pytest-spark") \
-        .getOrCreate()
+# spark = SparkSession.builder \
+#         .master("local[1]") \
+#         .appName("pytest-spark") \
+#         .getOrCreate()
 
 # COMMAND ----------
 
-def read_volume_files(volume_path: str, column_mapping_dict: dict = {}, **options) -> DataFrame:
+def read_volume_files(spark: SparkSession, volume_path: str, column_mapping_dict: dict = {}, **options) -> DataFrame:
     """
     Reads JSON, CSV, XLSX as Spark DataFrame from Volumes,
     cast column types using schema and mapping dictionary to convert all column names to snake case.

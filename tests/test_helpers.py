@@ -1,7 +1,9 @@
 import pytest
 from unittest.mock import MagicMock
+from pyspark.sql import SparkSession
 from pyspark.sql.types import StructField, StringType, IntegerType, DoubleType
-from utils.helpers import read_volume_files, cast_columns, raw_date_write
+from utils.helpers import read_volume_files, cast_columns, raw_date_write, aggregate_calculation
+from pyspark.sql.functions import sum, avg, col
 
 @pytest.fixture
 def mock_df():
@@ -12,49 +14,61 @@ def mock_df():
 
 @pytest.fixture
 def mock_spark_reader(monkeypatch, mock_df):
+    """
+    Patch SparkSession.read (read-only property) at CLASS level
+    """
+
     mock_reader = MagicMock()
     mock_reader.format.return_value = mock_reader
     mock_reader.options.return_value = mock_reader
     mock_reader.load.return_value = mock_df
 
-    mock_spark = MagicMock()
-    mock_spark.read = mock_reader
-
-    monkeypatch.setattr("utils.helpers.spark", mock_spark)
+    # 🔑 Patch the property on SparkSession
+    monkeypatch.setattr(
+        SparkSession,
+        "read",
+        property(lambda self: mock_reader)
+    )
 
     return mock_reader
 
 
-@pytest.mark.parametrize(
-    "file_path,expected_format",
-    [
-        ("dbfs:/volumes/test/file.csv", "csv"),
-        ("dbfs:/volumes/test/file.json", "json"),
-        ("dbfs:/volumes/test/file.xlsx", "excel"),
-    ],
-)
-def test_read_volume_files_supported_formats(
-    mock_spark_reader, mock_df, file_path, expected_format
-):
-    column_mapping = {"First Name": "first_name"}
 
-    result = read_volume_files(
+@pytest.mark.parametrize(
+    "file_path, expected_format",
+    [
+        ("data/input.csv", "csv"),
+        ("data/input.json", "json"),
+        ("data/input.xlsx", "excel"),
+    ]
+)
+def test_read_volume_files_with_magicmock(
+    spark,
+    mock_spark_reader,
+    file_path,
+    expected_format
+):
+    column_mapping = {"Emp Name": "emp_name", "Salary": "salary"}
+
+    result_df = read_volume_files(
+        spark=spark,
         volume_path=file_path,
         column_mapping_dict=column_mapping,
-        inferSchema="false"
+        delimiter=","  # extra option
     )
 
-    mock_spark_reader.format.assert_called_with(expected_format)
-    mock_spark_reader.options.assert_called()
-    mock_spark_reader.load.assert_called_with(file_path)
+    # ---- assertions ----
+    mock_spark_reader.format.assert_called_once_with(expected_format)
+    mock_spark_reader.options.assert_called_once()
+    mock_spark_reader.load.assert_called_once_with(file_path)
 
-    mock_df.withColumnsRenamed.assert_called_once_with(column_mapping)
-    assert result == mock_df
+    result_df.withColumnsRenamed.assert_called_once_with(column_mapping)
 
 
-def test_unsupported_file_format_raises_error():
+
+def test_unsupported_file_format_raises_error(spark):
     with pytest.raises(ValueError, match="Unsupported file format"):
-        read_volume_files("dbfs:/volumes/test/file.parquet")
+        read_volume_files(spark=spark, volume_path="dbfs:/volumes/test/file.parquet")
 
 
 
@@ -136,3 +150,56 @@ def test_raw_date_write_success(mock_write_df, table_name):
     mock_write_df.write.format.assert_called_once_with("delta")
     mock_write_df.write.mode.assert_called_once_with("overwrite")
     mock_write_df.write.saveAsTable.assert_called_once_with(table_name)
+
+
+
+@pytest.mark.parametrize(
+    "agg_func, order_cols, expected_data",
+    [
+        (
+            sum,
+            [("total_salary", "desc")],
+            [("IT", 300.0), ("HR", 200.0)]
+        ),
+        (
+            avg,
+            [("total_salary", "asc")],
+            [("HR", 200.0), ("IT", 150.0)]
+        ),
+    ]
+)
+def test_aggregate_calculation_df_equal(
+    spark,
+    agg_func,
+    order_cols,
+    expected_data
+):
+    # Input DataFrame
+    input_df = spark.createDataFrame(
+        [
+            ("IT", 100.0),
+            ("IT", 200.0),
+            ("HR", 200.0),
+        ],
+        ["dept", "salary"]
+    )
+
+    # Result DataFrame
+    result_df = aggregate_calculation(
+        df=input_df,
+        groupby_cols=["dept"],
+        agg_col="salary",
+        agg_func=agg_func,
+        round_upto=2,
+        alias_col_name="total_salary",
+        order_cols=order_cols
+    )
+
+    # Expected DataFrame (from parametrize)
+    expected_df = spark.createDataFrame(
+        expected_data,
+        ["dept", "total_salary"]
+    )
+
+    assert result_df.filter(col("dept") == "IT").select("total_salary").collect()[0][0] == expected_df.filter(col("dept") == "IT").select("total_salary").collect()[0][0]
+    assert result_df.schema == expected_df.schema
