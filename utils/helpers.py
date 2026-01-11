@@ -4,7 +4,7 @@ from pyspark.sql.functions import col
 
 # COMMAND ----------
 
-# import pandas as pd
+import pandas as pd
 
 spark = SparkSession.builder \
         .master("local[1]") \
@@ -50,9 +50,46 @@ def read_volume_files(volume_path: str, column_mapping_dict: dict = {}, **option
 # COMMAND ----------
 
 def cast_columns(df: DataFrame, schema: None):
+    """
+    Cast columns as per the schemna
+
+    Args:
+        df (DataFrame): Input DataFrame.
+        schema (StructType): Schema for the DataFrame.
+
+    Returns:
+        DataFrame
+    """
     return df.select(*[col(f.name).cast(f.dataType).alias(f.name) for f in schema])
 
 # COMMAND ----------
 
 def raw_date_write(df, full_table_name):
     df.write.format("delta").mode("overwrite").saveAsTable(full_table_name)
+
+# COMMAND ----------
+
+def aggregate_calculation(df, groupby_cols, agg_col, agg_func, round_upto, alias_col_name, order_cols):
+    """
+    Get aggregate calculation for given columns and aggregate function and order columns
+
+    Args:
+        df (DataFrame): Input DataFrame.
+        groupby_cols (list): List of columns to group by.
+        agg_col (str): Column to aggregate.
+        agg_func (str): Aggregate function.
+        round_upto (int): Number of decimal places to round to.
+        alias_col_name (str): Alias for the aggregated column.
+        order_cols (list): List of columns to order by.
+        
+    Returns:
+        DataFrame: Aggregated DataFrame with the specified columns and aggregate function.
+    """
+    exprs = [
+        desc(col) if order.lower() == "desc" else asc(col)
+        for col, order in order_cols
+    ]
+
+    return df.groupBy(groupby_cols) \
+            .agg(round(agg_func(agg_col), round_upto).alias(alias_col_name)) \
+            .orderBy(*exprs)
