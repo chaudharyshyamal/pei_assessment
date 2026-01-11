@@ -5,6 +5,8 @@ from pyspark.sql.types import StructField, StringType, IntegerType, DoubleType
 from utils.helpers import read_volume_files, cast_columns, raw_date_write, aggregate_calculation
 from pyspark.sql.functions import sum, avg, col
 
+
+# Unit test - read_volume_files
 @pytest.fixture
 def mock_df():
     df = MagicMock()
@@ -23,7 +25,6 @@ def mock_spark_reader(monkeypatch, mock_df):
     mock_reader.options.return_value = mock_reader
     mock_reader.load.return_value = mock_df
 
-    # 🔑 Patch the property on SparkSession
     monkeypatch.setattr(
         SparkSession,
         "read",
@@ -31,7 +32,6 @@ def mock_spark_reader(monkeypatch, mock_df):
     )
 
     return mock_reader
-
 
 
 @pytest.mark.parametrize(
@@ -57,13 +57,11 @@ def test_read_volume_files_with_magicmock(
         delimiter=","  # extra option
     )
 
-    # ---- assertions ----
     mock_spark_reader.format.assert_called_once_with(expected_format)
     mock_spark_reader.options.assert_called_once()
     mock_spark_reader.load.assert_called_once_with(file_path)
 
     result_df.withColumnsRenamed.assert_called_once_with(column_mapping)
-
 
 
 def test_unsupported_file_format_raises_error(spark):
@@ -72,6 +70,7 @@ def test_unsupported_file_format_raises_error(spark):
 
 
 
+# Unit test - cast_columns
 @pytest.fixture
 def input_df(spark):
     data = [
@@ -125,6 +124,7 @@ def test_cast_columns_success(input_df, schema, expected_types):
 
 
 
+# Unit test - raw_date_write
 @pytest.fixture
 def mock_write_df():
     df = MagicMock()
@@ -153,6 +153,8 @@ def test_raw_date_write_success(mock_write_df, table_name):
 
 
 
+
+# Unit test - aggregate_calculation
 @pytest.mark.parametrize(
     "agg_func, order_cols, expected_data",
     [

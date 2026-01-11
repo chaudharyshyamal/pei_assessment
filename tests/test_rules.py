@@ -3,6 +3,7 @@ from pyspark.sql import Row
 from dq.rules import validate_columns, validate_primary_key_unique, null_check, dq_compare, dq_compare_columns, dq_email_check, missing_reference_check
 
 
+# Unit test - validate_columns
 @pytest.fixture
 def test_df(spark):
     data = [
@@ -43,19 +44,17 @@ def test_df(spark):
 def test_validate_columns(test_df, columns_expected_datatype, expected_valid_ids, expected_invalid_ids):
     valid_df, invalid_df = validate_columns(test_df, columns_expected_datatype)
 
-    # Check IDs in valid_df
     valid_ids = sorted([row.id for row in valid_df.collect()])
     assert valid_ids == expected_valid_ids
 
-    # Check IDs in invalid_df
     invalid_ids = sorted([row.id for row in invalid_df.collect()])
     assert invalid_ids == expected_invalid_ids
 
-    # Optional: row count check
     assert valid_df.count() + invalid_df.count() == test_df.count()
 
 
 
+# Unit test - validate_primary_key_unique
 @pytest.fixture
 def df_with_duplicates(spark):
     data = [
@@ -90,19 +89,18 @@ def test_validate_primary_key_unique(df_fixture, request, expected_ids, expect_m
     result = validate_primary_key_unique(df, "id")
 
     if expect_message:
-        # Should return the "No duplicates found" string
         assert result == "No duplicates found"
     else:
         # Should return a DataFrame with duplicate rows
         ids_in_result = sorted([row.id for row in result.collect()])
-        # Only the duplicate keys should appear (duplicates may appear multiple times)
         for key in expected_ids:
             assert key in ids_in_result
-        # Row count should be greater than number of unique keys with duplicates
+
         assert result.count() > len(expected_ids)
 
 
 
+# Unit test - null_check
 @pytest.fixture
 def null_df(spark):
     data = [
@@ -123,7 +121,6 @@ def null_df(spark):
 def test_null_check(null_df, expected_counts):
     result_df = null_check(null_df)
 
-    # Collect results
     result_row = result_df.collect()[0]
     result = result_row.asDict()
 
@@ -134,11 +131,11 @@ def test_null_check(null_df, expected_counts):
     for col_name, count_expected in expected_counts.items():
         assert result[col_name] == count_expected
 
-    # Row count of result_df should be 1
     assert result_df.count() == 1
 
 
 
+# Unit test - dq_compare
 @pytest.fixture
 def sample_df(spark):
     data = [
@@ -161,17 +158,13 @@ def sample_df(spark):
     ]
 )
 def test_dq_compare_column(sample_df, operator, value, expected):
-    # Use dq_compare to create a new column
     result_df = sample_df.withColumn("flag", dq_compare("score", operator, value))
 
-    # Column should exist
     assert "flag" in result_df.columns
 
-    # Collect results and compare
     result = {row.id: row.flag for row in result_df.collect()}
     assert result == expected
 
-    # Ensure row count remains unchanged
     assert result_df.count() == sample_df.count()
 
 
@@ -181,6 +174,7 @@ def test_dq_compare_invalid_operator(sample_df):
 
 
 
+# Unit test - dq_compare_columns
 @pytest.fixture
 def compare_df(spark):
     data = [
@@ -210,14 +204,11 @@ def test_dq_compare_columns(compare_df, operator, expected):
         "compare_flag"
     )
 
-    # column existence
     assert "compare_flag" in result_df.columns
 
-    # validate values
     result = {row.id: row.compare_flag for row in result_df.collect()}
     assert result == expected
 
-    # row count unchanged
     assert result_df.count() == compare_df.count()
 
 
@@ -227,6 +218,7 @@ def test_dq_compare_columns_invalid_operator(compare_df):
 
 
 
+# Unit test - dq_email_check
 @pytest.fixture
 def email_df(spark):
     data = [
@@ -248,24 +240,22 @@ def email_df(spark):
         (3, False),
         (4, False),
         (5, False),
-        (6, None),  # rlike(NULL) -> NULL in Spark
+        (6, None),
     ]
 )
 def test_dq_email_check(email_df, test_id, expected_flag):
     result_df = dq_email_check(email_df, "email", "is_valid_email")
 
-    # column existence
     assert "is_valid_email" in result_df.columns
 
-    # validate value for specific row
     row = result_df.filter(f"id = {test_id}").collect()[0]
     assert row.is_valid_email == expected_flag
 
-    # optional: row count unchanged
     assert result_df.count() == email_df.count()
 
 
 
+# Unit test - missing_reference_check
 @pytest.fixture
 def txn_data(spark):
     data = [
@@ -303,7 +293,6 @@ def test_missing_reference_check(txn_data, ref_data):
 
     result = result_df.collect()
 
-    # Only one record should be missing (id = 3)
     assert len(result) == 1
     assert result[0]["id"] == "3"
     assert result[0]["amount"] == "30.0"

@@ -2,14 +2,6 @@
 from pyspark.sql.functions import expr, col, when, count
 from pyspark.sql import DataFrame, SparkSession
 
-# COMMAND ----------
-
-# import pandas as pd
-
-# spark = SparkSession.builder \
-#         .master("local[1]") \
-#         .appName("pytest-spark") \
-#         .getOrCreate()
 
 # COMMAND ----------
 
