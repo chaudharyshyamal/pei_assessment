@@ -281,7 +281,7 @@ df_enriched_4 = aggregate_calculation(df_orders_customers_products, \
                                     "total_profit", \
                                     [("order_year", "asc"), ("category", "asc"), ("sub_category", "asc"), ("customer_name", "asc")])
 
-display(df_enriched_4)
+# display(df_enriched_4)
 
 # COMMAND ----------
 
@@ -331,7 +331,7 @@ df_profit_by_year = aggregate_calculation(df_orders_customers_products, \
                                         "profit_per_year", \
                                         [("order_year", "asc")])
 
-display(df_profit_by_year)
+# display(df_profit_by_year)
 
 # COMMAND ----------
 
@@ -369,7 +369,7 @@ df_profit_by_year_category = aggregate_calculation(df_orders_customers_products,
                                                 "profit_per_year_category", \
                                                 [("order_year", "asc"), ("profit_per_year_category", "desc")])
 
-display(df_profit_by_year_category)
+# display(df_profit_by_year_category)
 
 # COMMAND ----------
 
@@ -406,7 +406,7 @@ df_profit_by_customer = aggregate_calculation(df_orders_customers_products, \
                                                 "profit_per_customer", \
                                                 [("profit_per_customer", "desc")])
 
-display(df_profit_by_customer)
+# display(df_profit_by_customer)
 
 # COMMAND ----------
 
@@ -444,4 +444,4 @@ df_profit_by_customer_year = aggregate_calculation(df_orders_customers_products,
                                                 "profit_per_customer_year", \
                                                 [("order_year", "asc"), ("profit_per_customer_year", "desc")])
 
-display(df_profit_by_customer_year)
+# display(df_profit_by_customer_year)
