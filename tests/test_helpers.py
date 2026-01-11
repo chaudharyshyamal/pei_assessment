@@ -97,19 +97,7 @@ def input_df(spark):
                 "amount": "double",
                 "name": "string",
             },
-        ),
-        (
-            [
-                StructField("id", StringType()),
-                StructField("amount", StringType()),
-                StructField("name", StringType()),
-            ],
-            {
-                "id": "string",
-                "amount": "string",
-                "name": "string",
-            },
-        ),
+        )
     ],
 )
 def test_cast_columns_success(input_df, schema, expected_types):

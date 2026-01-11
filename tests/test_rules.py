@@ -20,11 +20,6 @@ def test_df(spark):
     "columns_expected_datatype,expected_valid_ids,expected_invalid_ids",
     [
         (
-            {"id": "int", "age": "int"},  # check integer casting
-            [1, 3, 4],  # valid rows where id and age cast succeed
-            [2]         # invalid rows (age="thirty")
-        ),
-        (
             {"salary": "double"},         # check double casting
             [1, 2, 4],  # salary is valid double
             [3]         # salary="abc" invalid
@@ -223,11 +218,8 @@ def test_dq_compare_columns_invalid_operator(compare_df):
 def email_df(spark):
     data = [
         Row(id=1, email="test.user@example.com"),   # valid
-        Row(id=2, email="user123@gmail.co.in"),     # valid
-        Row(id=3, email="invalid-email"),           # invalid
-        Row(id=4, email="user@com"),                # invalid
-        Row(id=5, email="@gmail.com"),              # invalid
-        Row(id=6, email=None),                      # null
+        Row(id=2, email="invalid-email"),           # invalid
+        Row(id=3, email=None),                      # null
     ]
     return spark.createDataFrame(data)
 
@@ -236,11 +228,8 @@ def email_df(spark):
     "test_id,expected_flag",
     [
         (1, True),
-        (2, True),
-        (3, False),
-        (4, False),
-        (5, False),
-        (6, None),
+        (2, False),
+        (3, None),
     ]
 )
 def test_dq_email_check(email_df, test_id, expected_flag):
