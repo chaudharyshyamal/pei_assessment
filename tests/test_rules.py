@@ -119,7 +119,7 @@ def test_null_check(null_df, expected_counts):
     result_row = result_df.collect()[0]
     result = result_row.asDict()
 
-    # Only columns with nulls should appear
+    # Columns with nulls
     assert set(result.keys()) == set(expected_counts.keys())
 
     # Validate null counts
@@ -163,7 +163,7 @@ def test_dq_compare_column(sample_df, operator, value, expected):
     assert result_df.count() == sample_df.count()
 
 
-def test_dq_compare_invalid_operator(sample_df):
+def test_dq_compare_invalid_operator():
     with pytest.raises(ValueError):
         dq_compare("score", "INVALID", 10)
 

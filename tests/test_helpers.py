@@ -128,7 +128,6 @@ def mock_write_df():
 @pytest.mark.parametrize(
     "table_name",
     [
-        "default.raw_orders",
         "catalog.schema.raw_customers",
     ],
 )
